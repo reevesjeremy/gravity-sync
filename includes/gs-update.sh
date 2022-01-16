@@ -164,6 +164,16 @@ function show_info() {
         echo -e "CNAME Replication: Invalid Configuration"
     fi
     
+    if [ ${INCLUDE_SDHCP} == '1' ]
+    then
+        echo -e "STATIC DHCP Replication: Enabled (custom)"
+    elif [ ${INCLUDE_SDHCP} == '0' ]
+    then
+        echo -e "STATIC DHCP Replication: Disabled (default)"
+    else
+        echo -e "STATIC DHCP Replication: Invalid Configuration"
+    fi
+    
     if [ ${VERIFY_PASS} == '1' ]
     then
         echo -e "Verify Operations: Enabled (default)"

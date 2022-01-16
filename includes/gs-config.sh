@@ -418,6 +418,22 @@ function advanced_config_generate {
         fi
     fi
     
+    if [ "${INPUT_SKIP_CUSTOM}" == "Y" ]
+    then
+        MESSAGE="Enable Replicate 'Local Static DHCP Records' Feature? (Y/N, default 'Y')"
+        echo_need
+        read INPUT_INCLUDE_SDHCP
+        INPUT_INCLUDE_SDHCP="${INPUT_INCLUDE_SDHCP:-Y}"
+        
+        if [ "${INPUT_INCLUDE_SDHCP}" == "Y" ]
+        then
+            MESSAGE="Saving Local Static DHCP Preference to ${CONFIG_FILE}"
+            echo_stat
+            sed -i "/# INCLUDE_SDHCP=''/c\INCLUDE_SDHCP='1'" ${LOCAL_FOLDR}/settings/${CONFIG_FILE}
+            error_validate
+        fi
+    fi
+    
     MESSAGE="Change Backup Retention in Days? (Leave blank for default '3')"
     echo_need
     read INPUT_BACKUP_RETAIN

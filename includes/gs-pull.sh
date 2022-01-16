@@ -14,7 +14,7 @@ function task_pull {
     validate_gs_folders
     validate_ph_folders
     
-    if [ "${INCLUDE_CNAME}" == "1" ]
+    if [ "${INCLUDE_CNAME}" == "1" ] || [ "${INCLUDE_SDHCP}" == "1" ]
     then
         validate_dns_folders
     fi
@@ -100,6 +100,32 @@ function pull_gs_cname {
     fi
 }
 
+## Pull SDHCP
+function pull_gs_sdhcp {
+    if [ "${INCLUDE_SDHCP}" == '1' ]
+    then
+        if [ "$REMOTE_SDHCP" == "1" ]
+        then
+            backup_local_sdhcp
+            backup_remote_sdhcp
+            
+            MESSAGE="${UI_PULL_PRIMARY} ${UI_SDHCP_NAME}"
+            echo_stat
+            RSYNC_REPATH="rsync"
+            RSYNC_SOURCE="${REMOTE_USER}@${REMOTE_HOST}:${RIHOLE_DIR}/dnsmasq.d-${SDHCP_CONF}.backup"
+            RSYNC_TARGET="${LOCAL_FOLDR}/${BACKUP_FOLD}/${SDHCP_CONF}.pull"
+            create_rsynccmd
+            
+            MESSAGE="${UI_REPLACE_SECONDARY} ${UI_SDHCP_NAME}"
+            echo_stat
+            sudo cp ${LOCAL_FOLDR}/${BACKUP_FOLD}/${SDHCP_CONF}.pull ${DNSMAQ_DIR}/${SDHCP_CONF} >/dev/null 2>&1
+            error_validate
+            
+            validate_sdhcp_permissions
+        fi
+    fi
+}
+
 ## Pull Reload
 function pull_gs_reload {
     MESSAGE="${UI_PULL_RELOAD_WAIT}"
@@ -126,6 +152,7 @@ function pull_gs {
     pull_gs_grav
     pull_gs_cust
     pull_gs_cname
+    pull_gs_sdhcp
     pull_gs_reload
     md5_recheck
     backup_cleanup

@@ -117,6 +117,53 @@ function md5_compare {
         fi
     fi
     
+    if [ "${SKIP_CUSTOM}" != '1' ]
+    then
+        if [ "${INCLUDE_SDHCP}" == "1" ]
+        then
+            if [ -f ${DNSMAQ_DIR}/${SDHCP_CONF} ]
+            then
+                if ${SSHPASSWORD} ${SSH_CMD} -p ${SSH_PORT} -i "$HOME/${SSH_PKIF}" ${REMOTE_USER}@${REMOTE_HOST} test -e ${RNSMAQ_DIR}/${SDHCP_CONF}
+                then
+                    REMOTE_SDHCP="1"
+                    MESSAGE="${UI_HASHING_HASHING} ${UI_SDHCP_NAME}"
+                    echo_stat
+                    
+                    primarySDHCPMD5=$(${SSHPASSWORD} ${SSH_CMD} -p ${SSH_PORT} -i "$HOME/${SSH_PKIF}" ${REMOTE_USER}@${REMOTE_HOST} "md5sum ${RNSMAQ_DIR}/${SDHCP_CONF} | sed 's/\s.*$//'")
+                    error_validate
+                    
+                    MESSAGE="${UI_HASHING_COMPARING} ${UI_SDHCP_NAME}"
+                    echo_stat
+                    secondSDHCPMD5=$(md5sum ${DNSMAQ_DIR}/${SDHCP_CONF} | sed 's/\s.*$//')
+                    error_validate
+                    
+                    if [ "$primarySDHCPMD5" == "$last_primarySDHCPMD5" ] && [ "$secondSDHCPMD5" == "$last_secondSDHCPMD5" ]
+                    then
+                        HASHMARK=$((HASHMARK+0))
+                    else
+                        MESSAGE="${UI_HASHING_DIFFERNCE} ${UI_SDHCP_NAME}"
+                        echo_warn
+                        HASHMARK=$((HASHMARK+1))
+                    fi
+                else
+                    MESSAGE="${UI_SDHCP_NAME} ${UI_HASHING_NOTDETECTED} ${UI_HASHING_PRIMARY}"
+                    echo_info
+                fi
+            else
+                if ${SSHPASSWORD} ${SSH_CMD} -p ${SSH_PORT} -i "$HOME/${SSH_PKIF}" ${REMOTE_USER}@${REMOTE_HOST} test -e ${RNSMAQ_DIR}/${SDHCP_CONF}
+                then
+                    REMOTE_SDHCP="1"
+                    MESSAGE="${UI_SDHCP_NAME} ${UI_HASHING_DETECTED} ${UI_HASHING_PRIMARY}"
+                    HASHMARK=$((HASHMARK+1))
+                    echo_info
+                fi
+                
+                MESSAGE="${UI_SDHCP_NAME} ${UI_HASHING_NOTDETECTED} ${UI_HASHING_SECONDARY}"
+                echo_info
+            fi
+        fi
+    fi
+    
     if [ "$HASHMARK" != "0" ]
     then
         MESSAGE="${UI_HASHING_REQUIRED}"
@@ -139,6 +186,8 @@ function previous_md5 {
         last_secondCLMD5=$(sed "4q;d" ${LOG_PATH}/${HISTORY_MD5})
         last_primaryCNMD5=$(sed "5q;d" ${LOG_PATH}/${HISTORY_MD5})
         last_secondCNMD5=$(sed "6q;d" ${LOG_PATH}/${HISTORY_MD5})
+        last_primarySDHCPMD5=$(sed "7q;d" ${LOG_PATH}/${HISTORY_MD5})
+        last_secondSDHCPMD5=$(sed "8q;d" ${LOG_PATH}/${HISTORY_MD5})
     else
         last_primaryDBMD5="0"
         last_secondDBMD5="0"
@@ -146,7 +195,9 @@ function previous_md5 {
         last_secondCLMD5="0"
         last_primaryCNMD5="0"
         last_secondCNMD5="0"
-    fi
+        last_primarySDHCPMD5="0"
+        last_secondSDHCPMD5="0"
+fi
 }
 
 function md5_recheck {
@@ -230,6 +281,43 @@ function md5_recheck {
                 fi
                 
                 MESSAGE="${UI_CNAME_NAME} ${UI_HASHING_NOTDETECTED} ${UI_HASHING_SECONDARY}"
+                echo_info
+            fi
+        fi
+    fi
+        
+    if [ "${SKIP_CUSTOM}" != '1' ]
+    then
+        if [ "${INCLUDE_SDHCP}" == "1" ]
+        then
+            if [ -f ${DNSMAQ_DIR}/${SDHCP_CONF} ]
+            then
+                if ${SSHPASSWORD} ${SSH_CMD} -p ${SSH_PORT} -i "$HOME/${SSH_PKIF}" ${REMOTE_USER}@${REMOTE_HOST} test -e ${RNSMAQ_DIR}/${SDHCP_CONF}
+                then
+                    REMOTE_SDHCP="1"
+                    MESSAGE="${UI_HASHING_REHASHING} ${UI_SDHCP_NAME}"
+                    echo_stat
+                    
+                    primarySDHCPMD5=$(${SSHPASSWORD} ${SSH_CMD} -p ${SSH_PORT} -i "$HOME/${SSH_PKIF}" ${REMOTE_USER}@${REMOTE_HOST} "md5sum ${RNSMAQ_DIR}/${SDHCP_CONF} | sed 's/\s.*$//'")
+                    error_validate
+                    
+                    MESSAGE="${UI_HASHING_RECOMPARING} ${UI_SDHCP_NAME}"
+                    echo_stat
+                    secondSDHCPMD5=$(md5sum ${DNSMAQ_DIR}/${SDHCP_CONF} | sed 's/\s.*$//')
+                    error_validate
+                else
+                    MESSAGE="${UI_SDHCP_NAME} ${UI_HASHING_NOTDETECTED} ${UI_HASHING_PRIMARY}"
+                    echo_info
+                fi
+            else
+                if ${SSHPASSWORD} ${SSH_CMD} -p ${SSH_PORT} -i "$HOME/${SSH_PKIF}" ${REMOTE_USER}@${REMOTE_HOST} test -e ${RNSMAQ_DIR}/${SDHCP_CONF}
+                then
+                    REMOTE_SDHCP="1"
+                    MESSAGE="${UI_SDHCP_NAME} ${UI_HASHING_NOTDETECTED} ${UI_HASHING_PRIMARY}"
+                    echo_info
+                fi
+                
+                MESSAGE="${UI_SDHCP_NAME} ${UI_HASHING_NOTDETECTED} ${UI_HASHING_SECONDARY}"
                 echo_info
             fi
         fi

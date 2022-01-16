@@ -14,7 +14,7 @@ function task_push {
     validate_gs_folders
     validate_ph_folders
     
-    if [ "${INCLUDE_CNAME}" == "1" ]
+    if [ "${INCLUDE_CNAME}" == "1" ] || [ "${INCLUDE_SDHCP}" == "1" ]
     then
         validate_dns_folders
     fi
@@ -97,7 +97,7 @@ function push_gs_cust {
     fi
 }
 
-## Push Custom
+## Push CNAME
 function push_gs_cname {
     if [ "${INCLUDE_CNAME}" == '1' ]
     then
@@ -126,11 +126,48 @@ function push_gs_cname {
             CMD_REQUESTED="sudo chown root:root ${RNSMAQ_DIR}/${CNAME_CONF}"
             create_sshcmd
             
-                        
             MESSAGE="${UI_SET_FILE_PERMISSIONS} ${UI_CNAME_NAME}"
             echo_stat
             CMD_TIMEOUT='15'
             CMD_REQUESTED="sudo chmod 644 ${RNSMAQ_DIR}/${CNAME_CONF}"
+            create_sshcmd
+        fi
+    fi
+}
+
+## Push SDHCP
+function push_gs_sdhcp {
+    if [ "${INCLUDE_SDHCP}" == '1' ]
+    then
+        if [ "$REMOTE_SDHCP" == "1" ]
+        then
+            backup_remote_sdhcp
+            backup_local_sdhcp
+            
+            MESSAGE="${UI_BACKUP_COPY} ${UI_SDHCP_NAME}"
+            echo_stat
+            RSYNC_REPATH="rsync"
+            RSYNC_SOURCE="${REMOTE_USER}@${REMOTE_HOST}:${RIHOLE_DIR}/dnsmasq.d-${SDHCP_CONF}.backup"
+            RSYNC_TARGET="${LOCAL_FOLDR}/${BACKUP_FOLD}/${SDHCP_CONF}.push"
+            create_rsynccmd
+            
+            MESSAGE="${UI_PUSH_SECONDARY} ${UI_SDHCP_NAME}"
+            echo_stat
+            RSYNC_REPATH="sudo rsync"
+            RSYNC_SOURCE="${LOCAL_FOLDR}/${BACKUP_FOLD}/${BACKUPTIMESTAMP}-${SDHCP_CONF}.backup"
+            RSYNC_TARGET="${REMOTE_USER}@${REMOTE_HOST}:${RNSMAQ_DIR}/${SDHCP_CONF}"
+            create_rsynccmd
+            
+            MESSAGE="${UI_SET_FILE_OWNERSHIP} ${UI_SDHCP_NAME}"
+            echo_stat
+            CMD_TIMEOUT='15'
+            CMD_REQUESTED="sudo chown root:root ${RNSMAQ_DIR}/${SDHCP_CONF}"
+            create_sshcmd
+            
+            MESSAGE="${UI_SET_FILE_PERMISSIONS} ${UI_SDHCP_NAME}"
+            echo_stat
+            CMD_TIMEOUT='15'
+            CMD_REQUESTED="sudo chmod 644 ${RNSMAQ_DIR}/${SDHCP_CONF}"
             create_sshcmd
         fi
     fi
@@ -166,6 +203,7 @@ function push_gs {
     push_gs_grav
     push_gs_cust
     push_gs_cname
+    push_gs_sdhcp
     push_gs_reload
     md5_recheck
     backup_cleanup

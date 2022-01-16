@@ -27,6 +27,8 @@ function logs_export {
         echo -e ${secondCLMD5} >> ${LOG_PATH}/${HISTORY_MD5}
         echo -e ${primaryCNMD5} >> ${LOG_PATH}/${HISTORY_MD5}
         echo -e ${secondCNMD5} >> ${LOG_PATH}/${HISTORY_MD5}
+        echo -e ${primarySDHCPMD5} >> ${LOG_PATH}/${HISTORY_MD5}
+        echo -e ${secondSDHCPMD5} >> ${LOG_PATH}/${HISTORY_MD5}
         error_validate
     fi
     

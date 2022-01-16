@@ -21,7 +21,7 @@ function start_gs {
         new_root_check
     fi
     
-    if [ "${INCLUDE_CNAME}" == "1" ] && [ "${SKIP_CUSTOM}" == "1" ]
+    if [ "${SKIP_CUSTOM}" == "1" ] && ([ "${INCLUDE_CNAME}" == "1" ] || [ "${INCLUDE_SDHCP}" == "1" ])
     then
         MESSAGE="${UI_INVALID_DNS_CONFIG} ${CONFIG_FILE}"
         echo_fail
@@ -161,7 +161,7 @@ function task_compare {
     validate_gs_folders
     validate_ph_folders
     
-    if [ "${INCLUDE_CNAME}" == "1" ]
+    if [ "${INCLUDE_CNAME}" == "1" ] || [ "${INCLUDE_SDHCP}" == "1" ]
     then
         validate_dns_folders
     fi

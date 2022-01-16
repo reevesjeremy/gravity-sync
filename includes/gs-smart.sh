@@ -14,7 +14,7 @@ function task_smart {
     validate_gs_folders
     validate_ph_folders
     
-    if [ "${INCLUDE_CNAME}" == "1" ]
+    if [ "${INCLUDE_CNAME}" == "1" ] || [ "${INCLUDE_SDHCP}" == "1" ]
     then
         validate_dns_folders
     fi
@@ -41,6 +41,8 @@ function smart_gs {
     SECCLCHANGE="0"
     PRICNCHANGE="0"
     SECCNCHANGE="0"
+    PRISDCHANGE="0"
+    SECSDCHANGE="0"
     
     if [ "${primaryDBMD5}" != "${last_primaryDBMD5}" ]
     then
@@ -197,6 +199,62 @@ function smart_gs {
             fi
         else
             pull_gs_cname
+            PULLRESTART="1"
+        fi
+    fi
+
+    if [ "${primarySDHCPMD5}" != "${last_primarySDHCPMD5}" ]
+    then
+        PRISDCHANGE="1"
+    fi
+    
+    if [ "${secondSDHCPMD5}" != "${last_secondSDHCPMD5}" ]
+    then
+        SECSDCHANGE="1"
+    fi
+    
+    if [ "$INCLUDE_SDHCP" == "1" ]
+    then
+        if [ -f "${DNSMAQ_DIR}/${SDHCP_CONF}" ]
+        then
+            if [ "${PRISDCHANGE}" == "${SECSDCHANGE}" ]
+            then
+                if [ "${PRISDCHANGE}" != "0" ]
+                then
+                    MESSAGE="Both ${SDHCP_CONF} Have Changed"
+                    echo_warn
+                    
+                    PRISDDATE=$(${SSHPASSWORD} ${SSH_CMD} -p ${SSH_PORT} -i "$HOME/${SSH_PKIF}" ${REMOTE_USER}@${REMOTE_HOST} "stat -c %Y ${RNSMAQ_DIR}/${SDHCP_CONF}")
+                    SECSDDATE=$(stat -c %Y ${DNSMAQ_DIR}/${SDHCP_CONF})
+                    
+                    if (( "$PRISDDATE" >= "$SECSDDATE" ))
+                    then
+                        MESSAGE="Primary ${SDHCP_CONF} Last Changed"
+                        echo_warn
+                        
+                        pull_gs_sdhcp
+                        PULLRESTART="1"
+                    else
+                        MESSAGE="Secondary ${SDHCP_CONF} Last Changed"
+                        echo_warn
+                        
+                        push_gs_sdhcp
+                        PUSHRESTART="1"
+                    fi
+                fi
+            else
+                if [ "${PRISDCHANGE}" != "0" ]
+                then
+                    pull_gs_sdhcp
+                    PULLRESTART="1"
+                elif [ "${SECSDCHANGE}" != "0" ]
+                then
+                    push_gs_sdhcp
+                    PUSHRESTART="1"
+                fi
+            fi
+        else
+            pull_gs_sdhcp
             PULLRESTART="1"
         fi
     fi

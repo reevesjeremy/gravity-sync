@@ -263,3 +263,43 @@ function validate_cname_permissions() {
     fi
 }
 
+## Validate Local Static DHCP Permissions
+function validate_sdhcp_permissions() {
+    MESSAGE="${UI_VAL_FILE_OWNERSHIP} ${UI_SDHCP_NAME}"
+    echo_stat
+    
+    SDHCPLS_OWN=$(ls -ld ${DNSMAQ_DIR}/${SDHCP_CONF} | awk '{print $3 $4}')
+    if [ "$SDHCPLS_OWN" == "rootroot" ]
+    then
+        echo_good
+    else
+        echo_fail
+        
+        MESSAGE="${UI_COMPENSATE}"
+        echo_warn
+        
+        MESSAGE="${UI_SET_FILE_OWNERSHIP} ${UI_SDHCP_NAME}"
+        echo_stat
+        sudo chown root:root ${DNSMAQ_DIR}/${SDHCP_CONF} >/dev/null 2>&1
+        error_validate
+    fi
+    
+    MESSAGE="${UI_VAL_FILE_PERMISSION} ${UI_SDHCP_NAME}"
+    echo_stat
+    
+    SDHCPLS_RWE=$(namei -m ${DNSMAQ_DIR}/${SDHCP_CONF} | grep -v f: | grep ${SDHCP_CONF} | awk '{print $1}')
+    if [ "$SDHCPLS_RWE" == "-rw-r--r--" ]
+    then
+        echo_good
+    else
+        echo_fail
+        
+        MESSAGE="${UI_COMPENSATE}"
+        echo_warn
+        
+        MESSAGE="${UI_SET_FILE_PERMISSION} ${UI_SDHCP_NAME}"
+        echo_stat
+        sudo chmod 644 ${DNSMAQ_DIR}/${SDHCP_CONF} >/dev/null 2>&1
+        error_validate
+    fi
+}

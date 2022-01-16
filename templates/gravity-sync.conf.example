@@ -32,12 +32,14 @@ REMOTE_USER='pi'
 # GRAVITY_FI='' 			# default Pi-hole database file
 # CUSTOM_DNS=''				# default Pi-hole local DNS lookups
 # CNAME_CONF=''             # default DNSMASQ CNAME alias file
+# SDHCP_CONF=''        		# default DNSMASQ Static DHCP file
 # GSLAN_CONF=''             # default DNSMASQ GS managed file
 
 ### Interaction Customization
 # VERIFY_PASS=''			# replace in gravity-sync.conf to overwrite
 # SKIP_CUSTOM=''			# replace in gravity-sync.conf to overwrite
 # INCLUDE_CNAME=''			# replace in gravity-sync.conf to overwrite
+# INCLUDE_SDHCP=''			# replace in gravity-sync.conf to overwrite
 # DATE_OUTPUT=''			# replace in gravity-sync.conf to overwrite
 # PING_AVOID=''				# replace in gravity-sync.conf to overwrite
 # ROOT_CHECK_AVOID=''		# replace in gravity-sync.conf to overwrite

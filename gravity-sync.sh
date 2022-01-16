@@ -3,7 +3,7 @@ SCRIPT_START=$SECONDS
 
 # GRAVITY SYNC BY VMSTAN #####################
 PROGRAM='Gravity Sync'
-VERSION='3.4.8'
+VERSION='3.4.9'
 
 # For documentation or downloading updates visit https://github.com/vmstan/gravity-sync
 # Requires Pi-Hole 5.x or higher already be installed, for help visit https://pi-hole.net
@@ -39,6 +39,7 @@ CONTAIMAGE='pihole/pihole'          # official Pi-hole container image
 
 GRAVITY_FI='gravity.db' 			        # default Pi-hole database file
 CUSTOM_DNS='custom.list'			        # default Pi-hole local DNS lookups
+SDHCP_CONF='04-pihole-static-dhcp.conf'     # default DNSMASQ Static DHCP file
 CNAME_CONF='05-pihole-custom-cname.conf'    # default DNSMASQ CNAME alias file
 GSLAN_CONF='08-gs-lan.conf'                 # default DNSMASQ GS managed file
 
@@ -46,6 +47,7 @@ GSLAN_CONF='08-gs-lan.conf'                 # default DNSMASQ GS managed file
 VERIFY_PASS='0'						# replace in gravity-sync.conf to overwrite
 SKIP_CUSTOM='0'						# replace in gravity-sync.conf to overwrite
 INCLUDE_CNAME='0'					# replace in gravity-sync.conf to overwrite
+INCLUDE_SDHCP='0'					# replace in gravity-sync.conf to overwrite
 DATE_OUTPUT='0'						# replace in gravity-sync.conf to overwrite
 PING_AVOID='0'						# replace in gravity-sync.conf to overwrite
 ROOT_CHECK_AVOID='0'				# replace in gravity-sync.conf to overwrite

@@ -14,7 +14,7 @@ function task_restore {
     validate_gs_folders
     validate_ph_folders
     
-    if [ "${INCLUDE_CNAME}" == "1" ]
+    if [ "${INCLUDE_CNAME}" == "1" ] || [ "${INCLUDE_SDHCP}" == "1" ]
     then
         validate_dns_folders
     fi
@@ -143,6 +143,46 @@ function restore_gs {
             fi
         fi
     fi
+
+    if [ "$INCLUDE_SDHCP" == '1' ]
+    then
+        if [ -f ${DNSMAQ_DIR}/${SDHCP_CONF} ]
+        then
+            SDHCP_DATE_LIST=$(ls ${LOCAL_FOLDR}/${BACKUP_FOLD} | grep $(date +%Y) | grep ${SDHCP_CONF} | colrm 18)
+            
+            if [ "${SDHCP_DATE_LIST}" != "" ]
+            then
+                echo_lines
+                ls ${LOCAL_FOLDR}/${BACKUP_FOLD} | grep $(date +%Y) | grep ${SDHCP_CONF} | colrm 18
+                echo -e "IGNORE-SDHCP"
+                echo_lines
+                
+                MESSAGE="${UI_RESTORE_SELECT_DATE} ${UI_SDHCP_NAME}"
+                echo_need
+                read INPUT_SDHCPBACKUP_DATE
+                
+                if [ "$INPUT_SDHCPBACKUP_DATE" == "IGNORE-SDHCP" ]
+                then
+                    MESSAGE="${UI_RESTORE_SKIPPING} ${UI_SDHCP_NAME}"
+                    echo_warn
+                elif [ -f ${LOCAL_FOLDR}/${BACKUP_FOLD}/${INPUT_SDHCPBACKUP_DATE}-${SDHCP_CONF}.backup ]
+                then
+                    MESSAGE="${UI_SDHCP_NAME} ${UI_RESTORE_BACKUP_SELECTED}"
+                    echo_good
+                    
+                    DO_SDHCP_RESTORE='1'
+                else
+                    MESSAGE="${UI_RESTORE_INVALID}"
+                    echo_fail
+                    
+                    exit_nochange
+                fi
+            else
+                MESSAGE="${UI_SDHCP_NAME} ${UI_RESTORE_BACKUP_UNAVAILABLE}"
+                echo_info
+            fi
+        fi
+    fi
     
     if [ "$DO_GRAVITY_RESTORE" == "1" ]
     then
@@ -168,6 +208,15 @@ function restore_gs {
         echo_info
     else
         MESSAGE="${UI_CNAME_NAME} ${UI_RESTORE_BACKUP_UNAVAILABLE}"
+        echo_info
+    fi
+    
+    if [ "$DO_SDHCP_RESTORE" == "1" ]
+    then
+        MESSAGE="${UI_SDHCP_NAME} ${UI_RESTORE_FROM} ${INPUT_SDHCPBACKUP_DATE}"
+        echo_info
+    else
+        MESSAGE="${UI_SDHCP_NAME} ${UI_RESTORE_BACKUP_UNAVAILABLE}"
         echo_info
     fi
     
@@ -209,6 +258,19 @@ function restore_gs {
             error_validate
             
             validate_cname_permissions
+        fi
+    fi
+    
+    if [ "$DO_SDHCP_RESTORE" == '1' ]
+    then
+        if [ -f ${LOCAL_FOLDR}/${BACKUP_FOLD}/${INPUT_SDHCPBACKUP_DATE}-${SDHCP_CONF}.backup ]
+        then
+            MESSAGE="${UI_RESTORE_SECONDARY} ${UI_SDHCP_NAME}"
+            echo_stat
+            sudo cp ${LOCAL_FOLDR}/${BACKUP_FOLD}/${INPUT_SDHCPBACKUP_DATE}-${SDHCP_CONF}.backup ${DNSMAQ_DIR}/${SDHCP_CONF} >/dev/null 2>&1
+            error_validate
+            
+            validate_sdhcp_permissions
         fi
     fi
     
