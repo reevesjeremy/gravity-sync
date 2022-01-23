@@ -23,25 +23,39 @@ INFO="[${YELLOW}i${NC}]"
 NEED="[${BLUE}?${NC}]"
 LOGO="[${PURPLE}∞${NC}]"
 
+## Request https://github.com/vmstan/gravity-sync/issues/20
+##[2020-05-28 19:46:54]
+
+function get_date_time {
+    if [ "${DATE_OUTPUT}" == "1" ]
+    then
+        echo "[$(date "+%F %T")] "
+    fi
+}
+
 ## Echo Stack
 ### Informative
 function echo_info {
-    echo -e "${INFO} ${YELLOW}${MESSAGE}${NC}"
+    gdt=$(get_date_time)
+    echo -e "${gdt}${INFO} ${YELLOW}${MESSAGE}${NC}"
 }
 
 ### Warning
 function echo_warn {
-    echo -e "${WARN} ${PURPLE}${MESSAGE}${NC}"
+    gdt=$(get_date_time)
+    echo -e "${gdt}${WARN} ${PURPLE}${MESSAGE}${NC}"
 }
 
 ### Executing
 function echo_stat {
-    echo -en "${STAT} ${MESSAGE}"
+    gdt=$(get_date_time)
+    echo -en "${gdt}${STAT} ${MESSAGE}"
 }
 
 ### Success
 function echo_good {
-    echo -e "\r${GOOD} ${MESSAGE}"
+    gdt=$(get_date_time)
+    echo -e "\r${gdt}${GOOD} ${MESSAGE}"
 }
 
 ### Success
@@ -52,17 +66,19 @@ function echo_sameline {
 
 ### Failure
 function echo_fail {
-    echo -e "\r${FAIL} ${MESSAGE}"
+    gdt=$(get_date_time)
+    echo -e "\r${gdt}${FAIL} ${MESSAGE}"
 }
 
 ### Request
 function echo_need {
-    echo -en "${NEED} ${BOLD}${MESSAGE}:${NC} "
+    gdt=$(get_date_time)
+    echo -en "${gdt}${NEED} ${BOLD}${MESSAGE}:${NC} "
 }
 
 ### Gravity Sync Logo
 function echo_grav {
-    echo -e "${LOGO} ${BOLD}${MESSAGE}${NC}"
+    echo -e "${LOGO}${BOLD}${MESSAGE}${NC}"
 }
 
 ### Lines
